@@ -27,9 +27,28 @@ fn parse_tpl(input: &[u8]) -> IResult<&[u8], ()> {
     let move_by = image_table_offset - pos;
     println!("move by: {:?}", move_by);
 
-    let (input, _) = take(move_by)(input)?;
+    let (mut input, _) = take(move_by)(input)?;
+    pos += move_by;
 
-    // for i in 0..image_count {}
+    let mut image_table: Vec<(u32, u32)> = Vec::new();
+
+    for i in 0..image_count {
+        println!("image: {:?}", i);
+
+        let (image_input, image_header_offset) = take(4u8)(input)?;
+        pos += 4;
+        let image_header_offset = u32::from_be_bytes(image_header_offset.try_into().unwrap());
+        println!("image header offset: {:?}", image_header_offset);
+
+        let (image_input, palette_header_offset) = take(4u8)(image_input)?;
+        pos += 4;
+        let palette_header_offset = u32::from_be_bytes(palette_header_offset.try_into().unwrap());
+        println!("palette header offset: {:?}", palette_header_offset);
+
+        image_table.push((image_header_offset, palette_header_offset));
+
+        input = image_input;
+    }
 
     Ok((input, ()))
 }
