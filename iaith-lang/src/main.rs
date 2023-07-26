@@ -1,29 +1,32 @@
-use nom::{
-    bytes::complete::{tag, take_till},
-    character::is_newline,
-    IResult,
-};
+use std::io::{stdin, stdout, Write};
 
-fn iaith_file(input: &str) -> IResult<&str, ()> {
-    let (input, _) = tag("🏴󠁧󠁢󠁷󠁬󠁳󠁿")(input)?;
-    let (input, _) = tag("󠁷󠁬󠁳\n")(input)?;
+fn read() -> Result<String, std::io::Error> {
+    let mut stdout = stdout();
+    let stdin = stdin();
+    let mut input = String::new();
 
-    // let (input, line) = take_till(is_newline)(input)?;
+    print!("iaith-lang> ");
+    stdout.flush()?;
+    stdin.read_line(&mut input)?;
 
-    // print line
-    // println!("Line: {}", line);
-
-    Ok((input, ()))
+    Ok(input)
 }
 
-fn main() {
-    let contents =
-        std::fs::read_to_string("example.iaith").expect("Something went wrong reading the file");
+fn eval(line: String) -> String {
+    line
+}
 
-    let res = iaith_file(&contents).expect("Failed to parse file");
+fn print(line: String) -> Result<(), std::io::Error> {
+    let mut stdout = stdout();
+    print!("{}", line);
+    stdout.flush()?;
+    Ok(())
+}
 
-    println!("Parsed file: {:?}", res);
-
-    // print the contents of the file
-    println!("With text:\n{}", contents);
+fn main() -> Result<(), std::io::Error> {
+    loop {
+        let line = read()?;
+        let evaluated = eval(line);
+        print(evaluated)?;
+    }
 }
