@@ -1,0 +1,5 @@
+🏴󠁧󠁢󠁷󠁬󠁳󠁿
+(fun addOne (x) + x 1)
+(def num 2)
+
+(puts (addOne num))
