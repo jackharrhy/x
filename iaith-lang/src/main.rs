@@ -8,7 +8,7 @@ enum Node {
     List(Vec<Node>),
 }
 
-fn read() -> Result<Vec<Node>, std::io::Error> {
+fn read() -> Result<Node, std::io::Error> {
     let mut stdout = stdout();
     let stdin = stdin();
     let mut input = String::new();
@@ -42,6 +42,13 @@ fn read() -> Result<Vec<Node>, std::io::Error> {
             }
             ' ' => (),
             '\n' => (),
+            '0'..='9' => match stack.last_mut() {
+                Some(Node::List(list)) => match list.last_mut() {
+                    Some(Node::Integer(n)) => *n = *n * 10 + c.to_digit(10).unwrap() as i64,
+                    _ => list.push(Node::Integer(c.to_digit(10).unwrap() as i64)),
+                },
+                _ => panic!("Expected list"),
+            },
             _ => panic!("Unexpected character"),
         }
     }
@@ -51,20 +58,37 @@ fn read() -> Result<Vec<Node>, std::io::Error> {
     }
 
     match stack.pop().unwrap() {
-        Node::List(list) => Ok(list),
+        Node::List(list) => Ok(Node::List(list)),
         _ => panic!("Expected list"),
     }
 }
 
-fn eval(nodes: Vec<Node>) -> String {
-    let mut result = String::new();
-    result
+fn eval(nodes: Node) -> Node {
+    nodes
 }
 
-fn print(line: String) -> Result<(), std::io::Error> {
+fn print_node(node: Node) -> String {
+    match node {
+        Node::Addition => "+".to_string(),
+        Node::Subtraction => "-".to_string(),
+        Node::Integer(n) => n.to_string(),
+        Node::List(list) => {
+            let mut output = String::new();
+            output.push_str(&format!("("));
+            for node in list {
+                output.push_str(&print_node(node));
+            }
+            output.push_str(&format!(")"));
+            output
+        }
+    }
+}
+
+fn print(nodes: Node) -> Result<(), std::io::Error> {
     let mut stdout = stdout();
-    print!("{}", line);
+    print!("{}", print_node(nodes));
     stdout.flush()?;
+
     Ok(())
 }
 
